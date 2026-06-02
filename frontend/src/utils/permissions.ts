@@ -8,6 +8,12 @@
 export type Role = 'viewer' | 'technician' | 'analyst' | 'admin' | string
 
 export interface Permissions {
+  canViewTickets: boolean
+  canCreateTickets: boolean
+  canManageTickets: boolean
+  canAssignTickets: boolean
+  canDeleteTickets: boolean
+  /** @deprecated Legacy events — use tickets */
   canViewEvents: boolean
   canManageEvents: boolean
   canViewDevices: boolean
@@ -25,30 +31,40 @@ export function getPermissions(role: Role | undefined | null): Permissions {
   const isAdmin = r === 'admin'
   const isTechnician = r === 'technician'
   const isAnalyst = r === 'analyst'
+  const isViewer = r === 'viewer'
 
   return {
-    // Everyone authenticated can read events
+    canViewTickets: true,
+    canCreateTickets: true,
+    canManageTickets: isAdmin || isTechnician || isAnalyst,
+    canAssignTickets: isAdmin || isTechnician || isAnalyst,
+    canDeleteTickets: isAdmin,
+    // Legacy events API remains but UI uses tickets
     canViewEvents: true,
-    // Events: admin + analyst + technician may create/update
     canManageEvents: isAdmin || isAnalyst || isTechnician,
-    // Devices: admin + analyst + technician can view/update; create/delete are admin+analyst
     canViewDevices: isAdmin || isAnalyst || isTechnician,
     canCreateDevices: isAdmin || isAnalyst,
     canUpdateDevices: isAdmin || isAnalyst || isTechnician,
     canDeleteDevices: isAdmin || isAnalyst,
-    // Audit trail: admin + analyst
     canViewAudit: isAdmin || isAnalyst,
-    // User management: only admin can patch roles (analyst may list users, enforced backend-side)
     canManageUsers: isAdmin,
-    // User listing: admin + analyst
     canViewUsers: isAdmin || isAnalyst,
-    // Dashboard summary needs device visibility; analysts get a security view
     canViewDashboard: isAdmin || isTechnician || isAnalyst,
+    // Viewers use ticket-only home (no asset/audit access)
+    ...(isViewer
+      ? {
+          canViewDevices: false,
+          canViewDashboard: false,
+          canViewAudit: false,
+          canViewUsers: false,
+        }
+      : {}),
   }
 }
 
-/** Landing route for a role (viewers go straight to events). */
+/** Landing route for a role. */
 export function homeRouteForRole(role: Role | undefined | null): string {
   const perms = getPermissions(role)
-  return perms.canViewDashboard ? '/dashboard' : '/events'
+  if (perms.canViewDashboard) return '/dashboard'
+  return '/tickets'
 }

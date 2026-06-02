@@ -86,10 +86,10 @@ alembic -c alembic.ini upgrade head
 Docker:
 
 ```powershell
-docker compose exec api sh -c "cd /app && alembic -c /alembic.ini upgrade head"
+docker compose exec api alembic upgrade head
 ```
 
-Note: mount or copy `alembic/` into the API image if you run migrations in-container (or run from CI against the DB URL).
+The API image includes `alembic/` and `alembic.ini` under `/app` (see `Dockerfile`).
 
 ## Async endpoints
 

@@ -25,7 +25,7 @@ from logging_config import setup_logging
 from middleware.exception_handlers import register_exception_handlers
 from middleware.request_logging import RequestLoggingMiddleware
 from middleware.security_headers import SecurityHeadersMiddleware
-from routers import audit, auth, dashboard, devices, events, health, users
+from routers import audit, auth, dashboard, devices, events, health, tickets, users
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -71,7 +71,8 @@ app = FastAPI(
         {"name": "auth", "description": "Registration, login, token refresh"},
         {"name": "users", "description": "User administration (admin)"},
         {"name": "devices", "description": "Device inventory CRUD and listing"},
-        {"name": "events", "description": "Device event log"},
+        {"name": "events", "description": "Device event log (legacy — use tickets)"},
+        {"name": "tickets", "description": "IT support tickets"},
         {"name": "audit", "description": "Security audit trail (admin/analyst)"},
         {"name": "dashboard", "description": "Security monitoring summaries"},
         {"name": "health", "description": "Liveness and readiness probes"},
@@ -106,3 +107,4 @@ app.include_router(audit.router)
 app.include_router(dashboard.router)
 app.include_router(devices.router)
 app.include_router(events.router)
+app.include_router(tickets.router)

@@ -9,9 +9,12 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-# Project root on path so `app` package imports work when running from repo root
+# Repo root is parent of alembic/; API code is either app/ (local) or /app (Docker flat layout).
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-APP_DIR = os.path.join(ROOT, "app")
+if os.path.isfile(os.path.join(ROOT, "database.py")):
+    APP_DIR = ROOT
+else:
+    APP_DIR = os.path.join(ROOT, "app")
 if APP_DIR not in sys.path:
     sys.path.insert(0, APP_DIR)
 

@@ -7,7 +7,8 @@ import { DashboardLayout } from './layouts/DashboardLayout'
 import { AuditLogsPage } from './pages/AuditLogs'
 import { DashboardPage } from './pages/Dashboard'
 import { DevicesPage } from './pages/Devices'
-import { EventsPage } from './pages/Events'
+import { TicketDetailPage } from './pages/TicketDetailPage'
+import { TicketsPage } from './pages/TicketsPage'
 import { UsersPage } from './pages/Users'
 import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
@@ -24,8 +25,10 @@ export default function App() {
               {/* Send each role to the page it is allowed to see first */}
               <Route index element={<HomeRedirect />} />
 
-              {/* Everyone authenticated can read events */}
-              <Route path="events" element={<EventsPage />} />
+              <Route path="tickets" element={<TicketsPage />} />
+              <Route path="tickets/:id" element={<TicketDetailPage />} />
+              {/* Legacy events route — redirects to tickets */}
+              <Route path="events" element={<Navigate to="/tickets" replace />} />
 
               {/* Dashboard + devices: admin / technician (analyst gets dashboard) */}
               <Route element={<RequirePermission permission="canViewDashboard" />}>

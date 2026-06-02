@@ -87,6 +87,27 @@ in the audit log.
 | POST | `/events` | admin, technician | Create a device event |
 | GET | `/events` | any authenticated | List events (paginated) |
 
+> **Legacy:** `/events` remains for backward compatibility. New IT requests should use **Tickets**.
+
+### Tickets
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/tickets` | any authenticated | List tickets (viewers: own tickets only) |
+| POST | `/tickets` | any authenticated | Create a support ticket |
+| GET | `/tickets/{id}` | owner or staff | Ticket detail + comments |
+| PUT | `/tickets/{id}` | staff | Update title, description, category, priority, resolution notes |
+| PATCH | `/tickets/{id}/status` | staff | Change status (audited; closed actions logged separately) |
+| PATCH | `/tickets/{id}/assign` | staff | Assign or unassign (`assigned_to` user id or `null`) |
+| POST | `/tickets/{id}/assign/me` | staff | Self-assign |
+| DELETE | `/tickets/{id}` | admin | Permanently delete |
+| GET | `/tickets/{id}/comments` | owner or staff | List comments |
+| POST | `/tickets/{id}/comments` | owner (own ticket) or staff | Add comment |
+
+**List filters:** `status`, `priority`, `category`, `search`, `mine_only`, `assigned_to_me`, `unassigned`, `open_only`.
+
+**Roles:** *viewer* = employee submitting requests; *technician* / *analyst* = IT staff; *admin* = full access including delete.
+
 ### Audit logs
 
 | Method | Path | Auth | Description |

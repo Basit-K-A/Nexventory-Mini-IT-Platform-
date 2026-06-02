@@ -55,6 +55,7 @@ services:
       - backend
 
   api:
+    # DB migrations (after up): docker compose exec api alembic upgrade head
     build:
       context: .
       dockerfile: Dockerfile

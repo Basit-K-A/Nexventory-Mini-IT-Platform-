@@ -191,3 +191,50 @@ class UserListParams:
         self.is_active = is_active
         self.username = username
         self.email = email
+
+
+class TicketListParams:
+    """GET /tickets query parameters."""
+
+    def __init__(
+        self,
+        page: int = Query(DEFAULT_PAGE, ge=1, description="1-based page number"),
+        limit: int = Query(
+            DEFAULT_LIMIT,
+            ge=1,
+            le=MAX_LIMIT,
+            description="Rows per page (max 100)",
+        ),
+        sort_by: str | None = Query(
+            None,
+            description=(
+                "Sort column: id, ticket_number, title, category, priority, status, "
+                "created_by, assigned_to, created_at, updated_at"
+            ),
+        ),
+        sort_order: str = Query("desc", description="Sort direction: asc or desc"),
+        status: str | None = Query(None, max_length=30),
+        priority: str | None = Query(None, max_length=20),
+        category: str | None = Query(None, max_length=50),
+        created_by: int | None = Query(None, gt=0),
+        assigned_to: int | None = Query(None, gt=0),
+        search: str | None = Query(None, max_length=255, description="Title or ticket number"),
+        mine_only: bool = Query(False, description="Only tickets created by the current user"),
+        assigned_to_me: bool = Query(False, description="Only tickets assigned to the current user"),
+        unassigned: bool = Query(False, description="Only tickets with no assignee"),
+        open_only: bool = Query(False, description="Exclude Resolved and Closed"),
+    ):
+        self.page = page
+        self.limit = limit
+        self.sort_by = sort_by.strip() if sort_by and sort_by.strip() else None
+        self.sort_order = sort_order.strip().lower() if sort_order else "desc"
+        self.status = status.strip() if status and status.strip() else None
+        self.priority = priority.strip() if priority and priority.strip() else None
+        self.category = category.strip() if category and category.strip() else None
+        self.created_by = created_by
+        self.assigned_to = assigned_to
+        self.search = search
+        self.mine_only = mine_only
+        self.assigned_to_me = assigned_to_me
+        self.unassigned = unassigned
+        self.open_only = open_only

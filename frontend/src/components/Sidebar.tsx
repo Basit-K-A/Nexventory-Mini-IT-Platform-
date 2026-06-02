@@ -7,7 +7,7 @@ export function Sidebar() {
   // Build nav from permissions so each role sees only what it may access.
   const links = [
     permissions.canViewDashboard && { to: '/dashboard', label: 'Dashboard', end: false },
-    permissions.canViewEvents && { to: '/events', label: 'Events', end: false },
+    permissions.canViewTickets && { to: '/tickets', label: 'Tickets', end: false },
     permissions.canViewDevices && { to: '/devices', label: 'Devices', end: false },
     permissions.canViewAudit && { to: '/audit', label: 'Audit logs', end: false },
     permissions.canViewUsers && { to: '/users', label: 'Users', end: false },

@@ -313,7 +313,4 @@ Push to `main` triggers GitHub Actions: build Docker images, SSH to EC2, `git pu
 ## Future features
 
 - HTTPS/TLS on nginx (Let's Encrypt)
-- React dashboard on S3 + CloudFront
-- RDS managed PostgreSQL
-- Alembic database migrations
-- External uptime monitoring (UptimeRobot / CloudWatch)
+- Migrate to oracle cloud after AWS EC2 trial is over

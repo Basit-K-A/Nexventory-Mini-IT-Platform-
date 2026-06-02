@@ -49,17 +49,15 @@ flowchart LR
 Full diagrams (auth flow, request lifecycle, ER model, audit flow) are in
 **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
-## Screenshots
-
-> _Placeholders — drop images into `docs/screenshots/` and update the paths below._
+## Application Screenshots
 
 | Login | Dashboard |
-|-------|-----------|
-| ![Login](docs/screenshots/login.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+|--------|-----------|
+| <img src="https://github.com/user-attachments/assets/45806d35-40a0-42ec-bf29-b36286219aff" alt="Login" width="100%"> | <img src="https://github.com/user-attachments/assets/29b1d8ac-088a-4c32-b55d-390be1e37baf" alt="Dashboard" width="100%"> |
 
-| Devices | Audit logs |
+| Devices | Audit Logs |
 |---------|------------|
-| ![Devices](docs/screenshots/devices.png) | ![Audit logs](docs/screenshots/audit-logs.png) |
+| <img src="https://github.com/user-attachments/assets/f17d5a5b-fbc3-48f8-b8b1-f6b21428f2ea" alt="Devices" width="100%"> | <img src="https://github.com/user-attachments/assets/c82d7c53-193e-4554-b792-956ac67e3333" alt="Audit Logs" width="100%"> |
 
 ## Documentation
 

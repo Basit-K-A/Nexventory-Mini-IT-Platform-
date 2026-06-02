@@ -487,6 +487,12 @@ code {
   font-weight: 500;
 }
 
+.form__help {
+  font-size: 0.78rem;
+  line-height: 1.25;
+  color: var(--text-muted);
+}
+
 .form__field input,
 .form__field select {
   padding: 0.55rem 0.65rem;

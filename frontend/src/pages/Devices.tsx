@@ -20,7 +20,8 @@ const emptyForm: Omit<DeviceCreate, 'owner_id'> = {
 }
 
 export function DevicesPage() {
-  const { user, loading: authLoading, canManageDevices } = useAuth()
+  const { user, loading: authLoading, canCreateDevices, canUpdateDevices, canDeleteDevices } =
+    useAuth()
   const {
     devices,
     pagination,
@@ -47,7 +48,7 @@ export function DevicesPage() {
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault()
-    if (!user || !canManageDevices) return
+    if (!user || !canCreateDevices) return
     setSubmitting(true)
     setLocalError('')
     resetError()
@@ -59,6 +60,7 @@ export function DevicesPage() {
       })
       setForm(emptyForm)
       setShowForm(false)
+      setQuery({ page: 1 })
       await fetchDevices()
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Failed to create device')
@@ -69,7 +71,7 @@ export function DevicesPage() {
 
   async function handleUpdate(e: FormEvent) {
     e.preventDefault()
-    if (!editing || !user || !canManageDevices) return
+    if (!editing || !user || !canUpdateDevices) return
     setSubmitting(true)
     setLocalError('')
     try {
@@ -83,6 +85,7 @@ export function DevicesPage() {
       }
       await updateDevice(editing.id, payload)
       setEditing(null)
+      setQuery({ page: 1 })
       await fetchDevices()
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Failed to update device')
@@ -92,11 +95,12 @@ export function DevicesPage() {
   }
 
   async function handleDelete(device: Device) {
-    if (!canManageDevices) return
+    if (!canDeleteDevices) return
     if (!window.confirm(`Delete device "${device.hostname}"?`)) return
     setLocalError('')
     try {
       await deleteDevice(device.id)
+      setQuery({ page: 1 })
       await fetchDevices()
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Failed to delete device')
@@ -124,7 +128,7 @@ export function DevicesPage() {
           <h1>Devices</h1>
           <p className="page-header__subtitle">Managed infrastructure inventory</p>
         </div>
-        {canManageDevices ? (
+        {canCreateDevices ? (
           <button type="button" className="btn btn--primary" onClick={() => setShowForm((v) => !v)}>
             {showForm ? 'Cancel' : 'Add device'}
           </button>
@@ -181,7 +185,7 @@ export function DevicesPage() {
         </form>
       </Card>
 
-      {showForm && canManageDevices ? (
+      {showForm && canCreateDevices ? (
         <Card title="Add device" className="form-card">
           <form className="form form--grid" onSubmit={handleCreate}>
             <label className="form__field">
@@ -190,7 +194,13 @@ export function DevicesPage() {
                 required
                 value={form.hostname}
                 onChange={(e) => setForm({ ...form, hostname: e.target.value })}
+                placeholder="e.g. SRV-DB-01 or desktop_1234"
+                title="1–255 chars. Letters/numbers, dots, hyphens, underscores. No spaces. Avoid leading/trailing hyphen."
               />
+              <small className="form__help">
+                1–255 chars. Letters/numbers, dots (<code>.</code>), hyphens (<code>-</code>), underscores (
+                <code>_</code>). No spaces.
+              </small>
             </label>
             <label className="form__field">
               <span>IP address</span>
@@ -198,7 +208,10 @@ export function DevicesPage() {
                 required
                 value={form.ip_address}
                 onChange={(e) => setForm({ ...form, ip_address: e.target.value })}
+                placeholder="e.g. 10.0.1.15 or 2001:db8::1"
+                title="IPv4 or IPv6 address (no hostname). Examples: 10.0.1.15, 2001:db8::1"
               />
+              <small className="form__help">IPv4 or IPv6. Example: <code>10.0.1.15</code> or <code>2001:db8::1</code>.</small>
             </label>
             <label className="form__field">
               <span>Operating system</span>
@@ -206,20 +219,27 @@ export function DevicesPage() {
                 required
                 value={form.operating_system}
                 onChange={(e) => setForm({ ...form, operating_system: e.target.value })}
+                placeholder="e.g. Windows 11, Ubuntu 22.04"
+                title="Free text (max 100 characters). Example: Windows 11, Ubuntu 22.04"
               />
+              <small className="form__help">Free text (max 100 chars). Example: <code>Windows 11</code>, <code>Ubuntu 22.04</code>.</small>
             </label>
             <label className="form__field">
               <span>Department</span>
               <input
                 value={form.department ?? ''}
                 onChange={(e) => setForm({ ...form, department: e.target.value })}
+                placeholder="Optional (e.g. IT, Finance)"
+                title="Optional. If provided, max 100 characters."
               />
+              <small className="form__help">Optional (max 100 chars). Leave blank if unknown.</small>
             </label>
             <label className="form__field">
               <span>Status</span>
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
+                title="Choose the operational status for this device."
               >
                 <option value="active">active</option>
                 <option value="online">online</option>
@@ -227,6 +247,9 @@ export function DevicesPage() {
                 <option value="maintenance">maintenance</option>
                 <option value="inactive">inactive</option>
               </select>
+              <small className="form__help">
+                Use <code>online</code>/<code>offline</code> for reachability, <code>maintenance</code> for planned work.
+              </small>
             </label>
             <div className="form__actions">
               <button type="submit" className="btn btn--primary" disabled={submitting}>
@@ -237,7 +260,7 @@ export function DevicesPage() {
         </Card>
       ) : null}
 
-      {editing && canManageDevices ? (
+      {editing && canUpdateDevices ? (
         <Card title={`Edit ${editing.hostname}`} className="form-card">
           <form className="form form--grid" onSubmit={handleUpdate}>
             <label className="form__field">
@@ -246,7 +269,11 @@ export function DevicesPage() {
                 required
                 value={editing.hostname}
                 onChange={(e) => setEditing({ ...editing, hostname: e.target.value })}
+                title="1–255 chars. Letters/numbers, dots, hyphens, underscores. No spaces. Avoid leading/trailing hyphen."
               />
+              <small className="form__help">
+                Letters/numbers, dots (<code>.</code>), hyphens (<code>-</code>), underscores (<code>_</code>). No spaces.
+              </small>
             </label>
             <label className="form__field">
               <span>IP address</span>
@@ -254,7 +281,9 @@ export function DevicesPage() {
                 required
                 value={editing.ip_address}
                 onChange={(e) => setEditing({ ...editing, ip_address: e.target.value })}
+                title="IPv4 or IPv6 address (no hostname). Examples: 10.0.1.15, 2001:db8::1"
               />
+              <small className="form__help">IPv4 or IPv6. Example: <code>10.0.1.15</code> or <code>2001:db8::1</code>.</small>
             </label>
             <label className="form__field">
               <span>OS</span>
@@ -262,13 +291,16 @@ export function DevicesPage() {
                 required
                 value={editing.operating_system}
                 onChange={(e) => setEditing({ ...editing, operating_system: e.target.value })}
+                title="Free text (max 100 characters). Example: Windows 11, Ubuntu 22.04"
               />
+              <small className="form__help">Free text (max 100 chars). Example: <code>Windows 11</code>, <code>Ubuntu 22.04</code>.</small>
             </label>
             <label className="form__field">
               <span>Status</span>
               <select
                 value={editing.status}
                 onChange={(e) => setEditing({ ...editing, status: e.target.value })}
+                title="Choose the operational status for this device."
               >
                 <option value="active">active</option>
                 <option value="online">online</option>
@@ -276,6 +308,9 @@ export function DevicesPage() {
                 <option value="maintenance">maintenance</option>
                 <option value="inactive">inactive</option>
               </select>
+              <small className="form__help">
+                Use <code>online</code>/<code>offline</code> for reachability, <code>maintenance</code> for planned work.
+              </small>
             </label>
             <div className="form__actions">
               <button type="submit" className="btn btn--primary" disabled={submitting}>
@@ -297,7 +332,7 @@ export function DevicesPage() {
             title="No devices found"
             description="Adjust filters or add a device to get started."
             action={
-              canManageDevices ? (
+              canCreateDevices ? (
                 <button type="button" className="btn btn--primary" onClick={() => setShowForm(true)}>
                   Add device
                 </button>
@@ -316,7 +351,7 @@ export function DevicesPage() {
                     <th>Status</th>
                     <th>Dept</th>
                     <th>Owner</th>
-                    {canManageDevices ? <th>Actions</th> : null}
+                    {canUpdateDevices || canDeleteDevices ? <th>Actions</th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -332,22 +367,26 @@ export function DevicesPage() {
                       </td>
                       <td>{device.department ?? '—'}</td>
                       <td>{device.owner_id}</td>
-                      {canManageDevices ? (
+                      {canUpdateDevices || canDeleteDevices ? (
                         <td className="table-actions">
-                          <button
-                            type="button"
-                            className="btn btn--ghost btn--small"
-                            onClick={() => setEditing({ ...device })}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn--ghost btn--small"
-                            onClick={() => handleDelete(device)}
-                          >
-                            Delete
-                          </button>
+                          {canUpdateDevices ? (
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--small"
+                              onClick={() => setEditing({ ...device })}
+                            >
+                              Edit
+                            </button>
+                          ) : null}
+                          {canDeleteDevices ? (
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--small"
+                              onClick={() => handleDelete(device)}
+                            >
+                              Delete
+                            </button>
+                          ) : null}
                         </td>
                       ) : null}
                     </tr>

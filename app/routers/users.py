@@ -7,9 +7,9 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from auth.roles import require_role
+from auth.roles import require_any_role, require_role
 from constants.audit_actions import AuditAction
-from constants.roles import ROLE_ADMIN
+from constants.roles import ROLE_ADMIN, ROLE_ANALYST
 from crud import user as user_crud
 from database import get_db
 from dependencies.list_params import UserListParams
@@ -29,12 +29,12 @@ router = APIRouter(prefix="/users", tags=["users"])
 )
 def list_users(
     request: Request,
-    _admin: Annotated[User, Depends(require_role(ROLE_ADMIN))],
+    _user: Annotated[User, Depends(require_any_role(ROLE_ADMIN, ROLE_ANALYST))],
     params: Annotated[UserListParams, Depends()],
     db: Session = Depends(get_db),
 ):
     """
-    List platform users. Admin only.
+    List platform users. Admin and analyst.
 
     **Filters**: `role`, `is_active`, `username`, `email`
     """

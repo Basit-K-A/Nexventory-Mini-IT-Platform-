@@ -1,4 +1,4 @@
-import type { Event } from '../types/event'
+import type { Event, EventCreate, EventUpdate } from '../types/event'
 import { apiRequest, toQueryString } from './client'
 import type { PaginatedResponse } from './types'
 import { normalizePaginatedResponse } from './types'
@@ -17,4 +17,16 @@ export async function listEvents(params?: {
   })
   const raw = await apiRequest<PaginatedResponse<Event>>(`/events${qs}`)
   return normalizePaginatedResponse<Event>(raw)
+}
+
+export function createEvent(data: EventCreate): Promise<Event> {
+  return apiRequest<Event>('/events', { method: 'POST', body: data })
+}
+
+export function updateEvent(id: number, data: EventUpdate): Promise<Event> {
+  return apiRequest<Event>(`/events/${id}`, { method: 'PUT', body: data })
+}
+
+export function resolveEvent(id: number): Promise<Event> {
+  return apiRequest<Event>(`/events/${id}/resolve`, { method: 'POST' })
 }

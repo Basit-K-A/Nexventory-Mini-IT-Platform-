@@ -7,9 +7,10 @@ from enum import Enum
 
 from pydantic import field_validator
 
-# RFC 1123-ish hostname: letters, digits, hyphens, dots; no leading/trailing hyphen
+# RFC 1123-ish hostname: letters, digits, hyphens, dots (and underscores for Windows-style hostnames);
+# no leading/trailing hyphen
 HOSTNAME_PATTERN = re.compile(
-    r"^(?=.{1,255}$)(?!-)[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?(?:\.(?!-)[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?)*$"
+    r"^(?=.{1,255}$)(?!-)[A-Za-z0-9_](?:[A-Za-z0-9_\-]{0,61}[A-Za-z0-9_])?(?:\.(?!-)[A-Za-z0-9_](?:[A-Za-z0-9_\-]{0,61}[A-Za-z0-9_])?)*$"
 )
 
 
@@ -33,7 +34,7 @@ class EventSeverity(str, Enum):
 def validate_hostname(value: str) -> str:
     if not HOSTNAME_PATTERN.match(value):
         raise ValueError(
-            "hostname must be 1–255 characters, alphanumeric with hyphens/dots"
+            "hostname must be 1–255 characters, alphanumeric with hyphens/dots/underscores"
         )
     return value
 

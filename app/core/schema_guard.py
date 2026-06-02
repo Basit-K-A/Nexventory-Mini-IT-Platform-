@@ -26,6 +26,10 @@ _COLUMN_ADDITIONS: dict[str, dict[str, str]] = {
         "department": "VARCHAR(100)",
         "created_at": "TIMESTAMPTZ DEFAULT NOW()",
     },
+    "events": {
+        "resolved_at": "TIMESTAMPTZ",
+        "resolved_by": "INTEGER",
+    },
 }
 
 

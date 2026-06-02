@@ -8,6 +8,7 @@ import { AuditLogsPage } from './pages/AuditLogs'
 import { DashboardPage } from './pages/Dashboard'
 import { DevicesPage } from './pages/Devices'
 import { EventsPage } from './pages/Events'
+import { UsersPage } from './pages/Users'
 import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
 
@@ -37,6 +38,11 @@ export default function App() {
               {/* Audit logs: admin / analyst */}
               <Route element={<RequirePermission permission="canViewAudit" />}>
                 <Route path="audit" element={<AuditLogsPage />} />
+              </Route>
+
+              {/* Users: admin / analyst can view; admin can edit roles */}
+              <Route element={<RequirePermission permission="canViewUsers" />}>
+                <Route path="users" element={<UsersPage />} />
               </Route>
             </Route>
           </Route>

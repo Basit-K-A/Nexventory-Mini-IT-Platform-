@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from auth.roles import require_any_role, require_role
 from constants.audit_actions import AuditAction
-from constants.roles import ROLE_ADMIN, ROLE_TECHNICIAN
+from constants.roles import ROLE_ADMIN, ROLE_ANALYST, ROLE_TECHNICIAN
 from crud import device as device_crud
 from crud import user as user_crud
 from database import get_db
@@ -27,11 +27,11 @@ from services.list_cache import cached_paginated_list
 router = APIRouter(prefix="/devices", tags=["devices"])
 
 # RBAC for devices:
-# - read/update: admin + technician (viewers are blocked entirely)
-# - create/delete: admin only (technicians may edit, not provision or remove)
-RequireDeviceRead = require_role([ROLE_ADMIN, ROLE_TECHNICIAN])
-RequireDeviceUpdate = require_any_role(ROLE_ADMIN, ROLE_TECHNICIAN)
-RequireDeviceAdmin = require_role(ROLE_ADMIN)
+# - read/update: admin + analyst + technician (viewers are blocked entirely)
+# - create/delete: admin + analyst (technicians may edit, not provision or remove)
+RequireDeviceRead = require_role([ROLE_ADMIN, ROLE_ANALYST, ROLE_TECHNICIAN])
+RequireDeviceUpdate = require_any_role(ROLE_ADMIN, ROLE_ANALYST, ROLE_TECHNICIAN)
+RequireDeviceAdmin = require_role([ROLE_ADMIN, ROLE_ANALYST])
 
 
 @router.post(

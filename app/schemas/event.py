@@ -28,6 +28,27 @@ class EventCreate(BaseModel):
         return value.strip()
 
 
+class EventUpdate(BaseModel):
+    """Body for PUT /events/{id} — full replacement of mutable fields."""
+
+    event_type: str = Field(
+        min_length=1,
+        max_length=100,
+        pattern=r"^[a-zA-Z0-9_\-\s]+$",
+    )
+    severity: EventSeverity
+    message: str = Field(min_length=1, max_length=2000)
+    device_id: int = Field(gt=0)
+    timestamp: datetime | None = None
+
+    @field_validator("message")
+    @classmethod
+    def message_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("message cannot be blank")
+        return value.strip()
+
+
 class EventResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
@@ -49,3 +70,5 @@ class EventResponse(BaseModel):
     message: str
     timestamp: datetime
     device_id: int
+    resolved_at: datetime | None = None
+    resolved_by: int | None = None

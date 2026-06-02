@@ -12,13 +12,13 @@ from sqlalchemy.orm import Session
 from auth.roles import require_any_role
 from auth.security import get_current_active_user
 from constants.audit_actions import AuditAction
-from constants.roles import ROLE_ADMIN, ROLE_TECHNICIAN
+from constants.roles import ROLE_ADMIN, ROLE_ANALYST, ROLE_TECHNICIAN
 from crud import device as device_crud
 from crud import event as event_crud
 from database import get_db
 from dependencies.list_params import EventListParams
 from models.user import User
-from schemas.event import EventCreate, EventResponse
+from schemas.event import EventCreate, EventResponse, EventUpdate
 from schemas.pagination import PaginatedResponse, paginated_response
 from services.audit import log_audit_background
 from services.background_tasks import schedule_cache_invalidation
@@ -26,7 +26,7 @@ from services.list_cache import cached_paginated_list
 
 router = APIRouter(prefix="/events", tags=["events"])
 
-RequireEventWrite = require_any_role(ROLE_ADMIN, ROLE_TECHNICIAN)
+RequireEventWrite = require_any_role(ROLE_ADMIN, ROLE_ANALYST, ROLE_TECHNICIAN)
 
 
 @router.post(
@@ -58,6 +58,68 @@ def create_event(
     )
     schedule_cache_invalidation(background_tasks, "inventory")
     return event
+
+
+@router.put(
+    "/{event_id}",
+    response_model=EventResponse,
+    summary="Update an event",
+)
+def update_event(
+    event_id: int,
+    event_in: EventUpdate,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    current_user: Annotated[User, Depends(RequireEventWrite)],
+    db: Session = Depends(get_db),
+):
+    event = event_crud.get_event(db, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    if not device_crud.get_device(db, event_in.device_id):
+        raise HTTPException(status_code=404, detail="Device not found")
+    updated = event_crud.update_event(db, event, event_in)
+    log_audit_background(
+        background_tasks,
+        request,
+        action=AuditAction.EVENT_UPDATED,
+        status_code=status.HTTP_200_OK,
+        user_id=current_user.id,
+        details=(
+            f"event_id={updated.id} device_id={updated.device_id} "
+            f"type={updated.event_type} severity={updated.severity}"
+        ),
+    )
+    schedule_cache_invalidation(background_tasks, "inventory")
+    return updated
+
+
+@router.post(
+    "/{event_id}/resolve",
+    response_model=EventResponse,
+    summary="Resolve an event",
+)
+def resolve_event(
+    event_id: int,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    current_user: Annotated[User, Depends(RequireEventWrite)],
+    db: Session = Depends(get_db),
+):
+    event = event_crud.get_event(db, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    resolved = event_crud.resolve_event(db, event, resolved_by=current_user.id)
+    log_audit_background(
+        background_tasks,
+        request,
+        action=AuditAction.EVENT_RESOLVED,
+        status_code=status.HTTP_200_OK,
+        user_id=current_user.id,
+        details=f"event_id={resolved.id} device_id={resolved.device_id}",
+    )
+    schedule_cache_invalidation(background_tasks, "inventory")
+    return resolved
 
 
 @router.get(

@@ -23,7 +23,12 @@ interface AuthContextValue {
   permissions: Permissions
   homeRoute: string
   canAccessAudit: boolean
-  canManageDevices: boolean
+  canCreateDevices: boolean
+  canUpdateDevices: boolean
+  canDeleteDevices: boolean
+  canManageEvents: boolean
+  canViewUsers: boolean
+  canManageUsers: boolean
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -68,7 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const permissions = useMemo(() => getPermissions(user?.role), [user?.role])
   const homeRoute = useMemo(() => homeRouteForRole(user?.role), [user?.role])
   const canAccessAudit = permissions.canViewAudit
-  const canManageDevices = permissions.canManageDevices
+  const canCreateDevices = permissions.canCreateDevices
+  const canUpdateDevices = permissions.canUpdateDevices
+  const canDeleteDevices = permissions.canDeleteDevices
+  const canManageEvents = permissions.canManageEvents
+  const canViewUsers = permissions.canViewUsers
+  const canManageUsers = permissions.canManageUsers
 
   const value = useMemo(
     () => ({
@@ -81,9 +91,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       permissions,
       homeRoute,
       canAccessAudit,
-      canManageDevices,
+      canCreateDevices,
+      canUpdateDevices,
+      canDeleteDevices,
+      canManageEvents,
+      canViewUsers,
+      canManageUsers,
     }),
-    [user, loading, logout, refreshUser, permissions, homeRoute, canAccessAudit, canManageDevices],
+    [
+      user,
+      loading,
+      logout,
+      refreshUser,
+      permissions,
+      homeRoute,
+      canAccessAudit,
+      canCreateDevices,
+      canUpdateDevices,
+      canDeleteDevices,
+      canManageEvents,
+      canViewUsers,
+      canManageUsers,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

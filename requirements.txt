@@ -31,3 +31,8 @@ redis==5.2.1
 
 # Migrations
 alembic==1.14.1
+
+# Testing (installed into the container so you can run pytest inside Docker)
+pytest==8.3.4
+pytest-cov==6.0.0
+httpx==0.28.1

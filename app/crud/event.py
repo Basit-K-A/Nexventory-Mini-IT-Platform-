@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from core.query import apply_exact_filters, apply_ilike_filters, apply_sort, paginate
 from dependencies.list_params import EventListParams
 from models.event import Event
-from schemas.event import EventCreate
+from schemas.event import EventCreate, EventUpdate
 from schemas.pagination import PaginationMeta
 
 _EVENT_SORT_COLUMNS = {
@@ -72,3 +72,35 @@ def create_event(db: Session, event_in: EventCreate) -> Event:
         raise
     db.refresh(db_event)
     return db_event
+
+
+def update_event(db: Session, event: Event, event_in: EventUpdate) -> Event:
+    event.event_type = event_in.event_type
+    event.severity = event_in.severity.value
+    event.message = event_in.message
+    event.device_id = event_in.device_id
+    if event_in.timestamp is not None:
+        event.timestamp = event_in.timestamp
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    db.refresh(event)
+    return event
+
+
+def resolve_event(db: Session, event: Event, *, resolved_by: int) -> Event:
+    """Mark an event resolved (idempotent)."""
+    from datetime import datetime, timezone
+
+    if event.resolved_at is None:
+        event.resolved_at = datetime.now(timezone.utc)
+        event.resolved_by = resolved_by
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        db.refresh(event)
+    return event

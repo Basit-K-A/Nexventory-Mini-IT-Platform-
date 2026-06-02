@@ -9,10 +9,14 @@ export type Role = 'viewer' | 'technician' | 'analyst' | 'admin' | string
 
 export interface Permissions {
   canViewEvents: boolean
+  canManageEvents: boolean
   canViewDevices: boolean
-  canManageDevices: boolean
+  canCreateDevices: boolean
+  canUpdateDevices: boolean
+  canDeleteDevices: boolean
   canViewAudit: boolean
   canManageUsers: boolean
+  canViewUsers: boolean
   canViewDashboard: boolean
 }
 
@@ -25,14 +29,19 @@ export function getPermissions(role: Role | undefined | null): Permissions {
   return {
     // Everyone authenticated can read events
     canViewEvents: true,
-    // Devices: admin + technician only (viewers blocked, matches backend)
-    canViewDevices: isAdmin || isTechnician,
-    // Technicians may edit; create/delete are admin-only (enforced on backend)
-    canManageDevices: isAdmin || isTechnician,
+    // Events: admin + analyst + technician may create/update
+    canManageEvents: isAdmin || isAnalyst || isTechnician,
+    // Devices: admin + analyst + technician can view/update; create/delete are admin+analyst
+    canViewDevices: isAdmin || isAnalyst || isTechnician,
+    canCreateDevices: isAdmin || isAnalyst,
+    canUpdateDevices: isAdmin || isAnalyst || isTechnician,
+    canDeleteDevices: isAdmin || isAnalyst,
     // Audit trail: admin + analyst
     canViewAudit: isAdmin || isAnalyst,
-    // User management: admin only
+    // User management: only admin can patch roles (analyst may list users, enforced backend-side)
     canManageUsers: isAdmin,
+    // User listing: admin + analyst
+    canViewUsers: isAdmin || isAnalyst,
     // Dashboard summary needs device visibility; analysts get a security view
     canViewDashboard: isAdmin || isTechnician || isAnalyst,
   }

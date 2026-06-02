@@ -27,5 +27,8 @@ class Event(Base):
     message = Column(Text, nullable=False)
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     device_id = Column(Integer, ForeignKey("devices.id"), nullable=False, index=True)
+    # Resolution is additive/backwards-safe (nullable) so existing rows remain valid.
+    resolved_at = Column(DateTime(timezone=True), nullable=True, index=True)
+    resolved_by = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
 
     device = relationship("Device", back_populates="events")

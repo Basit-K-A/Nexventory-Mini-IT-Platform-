@@ -10,6 +10,7 @@ export function Sidebar() {
     permissions.canViewEvents && { to: '/events', label: 'Events', end: false },
     permissions.canViewDevices && { to: '/devices', label: 'Devices', end: false },
     permissions.canViewAudit && { to: '/audit', label: 'Audit logs', end: false },
+    permissions.canViewUsers && { to: '/users', label: 'Users', end: false },
   ].filter(Boolean) as { to: string; label: string; end: boolean }[]
 
   return (

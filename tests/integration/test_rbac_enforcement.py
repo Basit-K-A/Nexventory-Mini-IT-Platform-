@@ -41,12 +41,20 @@ def test_technician_cannot_create_device(client, make_user, auth_header):
 def test_only_admin_lists_users(client, make_user, auth_header):
     admin = make_user(username="admin", role="admin")
     tech = make_user(username="tech", role="technician")
+    analyst = make_user(username="analyst", role="analyst")
 
     assert client.get("/users", headers=auth_header(admin.username)).status_code == 200
     assert client.get("/users", headers=auth_header(tech.username)).status_code == 403
+    assert client.get("/users", headers=auth_header(analyst.username)).status_code == 200
 
 
 def test_viewer_can_list_events(client, make_user, auth_header):
     viewer = make_user(username="viewer", role="viewer")
     resp = client.get("/events", headers=auth_header(viewer.username))
+    assert resp.status_code == 200
+
+
+def test_technician_can_access_dashboard(client, make_user, auth_header):
+    tech = make_user(username="tech", role="technician")
+    resp = client.get("/dashboard/overview", headers=auth_header(tech.username))
     assert resp.status_code == 200

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from auth.roles import require_any_role
-from constants.roles import ROLE_ADMIN, ROLE_ANALYST
+from constants.roles import ROLE_ADMIN, ROLE_ANALYST, ROLE_TECHNICIAN
 from core.limiter import limiter
 from crud import alert as alert_crud
 from crud import event as event_crud
@@ -36,7 +36,7 @@ from services import dashboard_service as dash_svc
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
-RequireDashboardAccess = require_any_role(ROLE_ADMIN, ROLE_ANALYST)
+RequireDashboardAccess = require_any_role(ROLE_ADMIN, ROLE_ANALYST, ROLE_TECHNICIAN)
 _DASHBOARD_LIMIT = os.getenv("RATE_LIMIT_DASHBOARD", "60/minute")
 
 
